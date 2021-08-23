@@ -54,6 +54,7 @@ public class RepositoryService extends Service<ObservableList<Repository>> {
       ArrayList<Repository> repositories1 = new ArrayList<>(parseRepos(response));
 
       while (links.next != null){
+        System.out.println("Retrieving page...");
         HttpResponse<String> nextResponse = getResponse(links.next);
         repositories1.addAll(parseRepos(nextResponse));
         links = new RelativeLinks(nextResponse.headers().firstValue("link").get());
@@ -65,8 +66,7 @@ public class RepositoryService extends Service<ObservableList<Repository>> {
 
     private List<Repository> parseRepos(HttpResponse<String> response) {
       Type type = new TypeToken<List<Repository>>() {}.getType();
-      List<Repository> repositories = gson.fromJson(response.body(), type);
-      return repositories;
+      return gson.fromJson(response.body(), type);
     }
 
     private HttpResponse<String> getResponse(String url) throws java.io.IOException, InterruptedException {
@@ -75,8 +75,7 @@ public class RepositoryService extends Service<ObservableList<Repository>> {
         .header("Authorization", basicAuth("aelfric", accessToken))
         .build();
 
-      var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-      return response;
+      return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
   }
 }
