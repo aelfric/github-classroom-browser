@@ -8,6 +8,11 @@ class RelativeLinksTest {
       new RelativeLinks(
         "<https://api.github.com/organizations/74933497/repos?page=2>; rel=\"next\", <https://api.github.com/organizations/74933497/repos?page=21>; rel=\"last\"");
     System.out.println(relativeLinks);
+    RelativeLinks
+      relativeLinks2 =
+      new RelativeLinks(
+        "");
+    System.out.println(relativeLinks2);
   }
 
 }
