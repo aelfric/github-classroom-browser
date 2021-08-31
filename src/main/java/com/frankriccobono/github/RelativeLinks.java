@@ -10,13 +10,13 @@ public class RelativeLinks {
   public String next;
   public String last;
 
-  RelativeLinks(String header) {
+  public RelativeLinks(String header) {
     Arrays
       .stream(header.split(",\\s*"))
       .forEach(this::parseLink);
   }
 
-  RelativeLinks(HttpResponse<?> response){
+  public RelativeLinks(HttpResponse<?> response){
     this(response
       .headers()
       .firstValue("link")

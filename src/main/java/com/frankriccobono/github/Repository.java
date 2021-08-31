@@ -1,14 +1,20 @@
 package com.frankriccobono.github;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Repository {
   public long id;
-  public String node_id;
   public String name;
   public String full_name;
+  @SerializedName("private")
   public boolean isPrivate;
-  public String  clone_url;
-  public String  ssh_url;
+  @SerializedName("ssh_url")
+  public String sshUrl;
   public String  url;
+
+  public Repository(){
+
+  }
 
   @Override
   public String toString() {

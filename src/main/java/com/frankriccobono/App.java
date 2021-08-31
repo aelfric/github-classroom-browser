@@ -34,7 +34,7 @@ import java.util.Optional;
  * JavaFX App
  */
 public class App extends Application {
-  final RepositoryService service = new RepositoryService();
+  private final RepositoryService service = new RepositoryService();
 
   @Override
   public void start(Stage stage) {
@@ -83,7 +83,7 @@ public class App extends Application {
       ObservableList<Repository> selectedItems =
         listView.getSelectionModel().getSelectedItems();
       for (Repository repo : selectedItems) {
-        this.cloneRepo(repo.ssh_url, repo.name);
+        this.cloneRepo(repo.sshUrl, repo.name);
       }
     });
     btnDelete.setOnMouseClicked((event) -> {
@@ -105,7 +105,7 @@ public class App extends Application {
 
         if (result.isPresent() && result.get() == delete) {
           System.out.println("WARNING - DELETING " + repo);
-          cloneRepo(repo.ssh_url, repo.name);
+          cloneRepo(repo.sshUrl, repo.name);
           GithubApiWrapper githubApiWrapper = new GithubApiWrapper();
           githubApiWrapper.deleteRepository(repo);
         }
@@ -156,7 +156,7 @@ public class App extends Application {
       if (repository == null || empty) {
         setText(null);
       } else {
-        setText(repository.full_name);
+        setText(repository.full_name  + (repository.isPrivate ? " (private)" : ""));
         setItem(repository);
       }
     }
@@ -182,8 +182,8 @@ public class App extends Application {
                 }
 
                 @Override
-                protected JSch getJSch(OpenSshConfig.Host hc, FS fs) throws JSchException {
-                  JSch jSch = super.getJSch(hc, fs);
+                protected JSch getJSch(OpenSshConfig.Host hostConfig, FS filesystem) throws JSchException {
+                  JSch jSch = super.getJSch(hostConfig, filesystem);
                   jSch.addIdentity(
                     System.getenv("SSH_PRIVATE_KEY_FILE"),
                     System.getenv("SSH_PASSPHRASE")

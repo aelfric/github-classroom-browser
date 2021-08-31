@@ -8,6 +8,7 @@ import javafx.concurrent.Task;
 public class RepositoryService extends Service<ObservableList<Repository>> {
 
   public RepositoryService() {
+    super();
   }
 
   @Override
@@ -18,6 +19,7 @@ public class RepositoryService extends Service<ObservableList<Repository>> {
   private static class SingleRetrieverTask extends Task<ObservableList<Repository>>{
 
     public SingleRetrieverTask() {
+      super();
     }
 
     @Override
