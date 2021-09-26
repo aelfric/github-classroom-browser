@@ -1,5 +1,6 @@
 package com.frankriccobono;
 
+import com.frankriccobono.github.EnvironmentConstants;
 import com.frankriccobono.github.GithubApiWrapper;
 import com.frankriccobono.github.Repository;
 import com.frankriccobono.github.RepositoryService;
@@ -14,11 +15,11 @@ import javafx.concurrent.Worker;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.SshTransport;
@@ -26,8 +27,7 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.util.FS;
 
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.Base64;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -35,11 +35,15 @@ import java.util.Optional;
  */
 public class App extends Application {
   private final RepositoryService service = new RepositoryService();
+  File destinationDir;
 
   @Override
   public void start(Stage stage) {
-    stage.setTitle("Repositories ");
 
+    DirectoryChooser directoryChooser = new DirectoryChooser();
+    destinationDir = directoryChooser.showDialog(stage);
+
+    stage.setTitle("Repositories ");
 
     Button btnClone = new Button();
     btnClone.setText("Clone");
@@ -83,7 +87,7 @@ public class App extends Application {
       ObservableList<Repository> selectedItems =
         listView.getSelectionModel().getSelectedItems();
       for (Repository repo : selectedItems) {
-        this.cloneRepo(repo.sshUrl, repo.name);
+        this.cloneOrPullRepo(repo.sshUrl, repo.name);
       }
     });
     btnDelete.setOnMouseClicked((event) -> {
@@ -105,9 +109,10 @@ public class App extends Application {
 
         if (result.isPresent() && result.get() == delete) {
           System.out.println("WARNING - DELETING " + repo);
-          cloneRepo(repo.sshUrl, repo.name);
-          GithubApiWrapper githubApiWrapper = new GithubApiWrapper();
-          githubApiWrapper.deleteRepository(repo);
+          if(cloneOrPullRepo(repo.sshUrl, repo.name)) {
+            GithubApiWrapper githubApiWrapper = new GithubApiWrapper();
+            githubApiWrapper.deleteRepository(repo);
+          }
         }
       }
     });
@@ -127,12 +132,6 @@ public class App extends Application {
 
   public static void main(String[] args) {
     launch();
-
-  }
-
-  public static String basicAuth(String username, String password) {
-    return "Basic " + Base64.getEncoder()
-      .encodeToString((username + ":" + password).getBytes());
   }
 
   public ObservableList<Repository> getRepositories() {
@@ -156,47 +155,61 @@ public class App extends Application {
       if (repository == null || empty) {
         setText(null);
       } else {
-        setText(repository.full_name  + (repository.isPrivate ? " (private)" : ""));
+        setText(repository.full_name + (repository.isPrivate ? " (private)" : ""));
         setItem(repository);
       }
     }
   }
 
-  public void cloneRepo(String cloneUrl, String repoName) {
-    File destination = Paths.get("E:", "Dropbox", "ECE552", "2021 Spring", repoName).toFile();
+  public boolean cloneOrPullRepo(String cloneUrl, String repoName) {
+    if(destinationDir == null) return false;
 
-    if (!RepositoryCache.FileKey.isGitRepository(destination, FS.DETECTED)) {
-      try {
+    File destination = destinationDir.toPath().resolve(repoName).toFile();
+
+    try {
+      if (!destination.exists()) {
+
         Git.cloneRepository()
           .setURI(cloneUrl)
           .setDirectory(
             destination
           )
-          .setTransportConfigCallback(new TransportConfigCallback() {
-            @Override
-            public void configure(Transport transport) {
-              SshTransport sshTransport = (SshTransport) transport;
-              sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
-                @Override
-                protected void configure(OpenSshConfig.Host host, Session session) {
-                }
-
-                @Override
-                protected JSch getJSch(OpenSshConfig.Host hostConfig, FS filesystem) throws JSchException {
-                  JSch jSch = super.getJSch(hostConfig, filesystem);
-                  jSch.addIdentity(
-                    System.getenv("SSH_PRIVATE_KEY_FILE"),
-                    System.getenv("SSH_PASSPHRASE")
-                  );
-                  return jSch;
-                }
-              });
-            }
-          })
+          .setTransportConfigCallback(new SshCallback())
           .call();
-      } catch (GitAPIException e) {
-        e.printStackTrace();
+      } else {
+        Git repo = Git.open(destination);
+        repo
+          .pull()
+          .setTransportConfigCallback(new SshCallback())
+          .call();
       }
+      return true;
+    } catch (GitAPIException | IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  static class SshCallback implements TransportConfigCallback {
+    @Override
+    public void configure(Transport transport) {
+      SshTransport sshTransport = (SshTransport) transport;
+      sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+        @Override
+        protected void configure(OpenSshConfig.Host host, Session session) {
+        }
+
+        @Override
+        protected JSch getJSch(OpenSshConfig.Host hostConfig,
+                               FS filesystem) throws JSchException {
+          JSch jSch = super.getJSch(hostConfig, filesystem);
+          jSch.addIdentity(
+            EnvironmentConstants.PRIVATE_KEY,
+            EnvironmentConstants.PASSPHRASE
+          );
+          return jSch;
+        }
+      });
     }
   }
 }

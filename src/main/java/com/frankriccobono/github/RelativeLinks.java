@@ -6,6 +6,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RelativeLinks {
+  private static final String LINK = "link";
+  private static final String NEXT = "next";
+  private static final String PREV = "prev";
+  private static final String LAST = "last";
+
   public String prev;
   public String next;
   public String last;
@@ -19,7 +24,7 @@ public class RelativeLinks {
   public RelativeLinks(HttpResponse<?> response){
     this(response
       .headers()
-      .firstValue("link")
+      .firstValue(LINK)
       .orElse(""));
   }
 
@@ -30,13 +35,13 @@ public class RelativeLinks {
       String linkUrl = matcher.group(1);
       String rel = matcher.group(2);
       switch (rel) {
-        case "next":
+        case NEXT:
           this.next = linkUrl;
           break;
-        case "prev":
+        case PREV:
           this.prev = linkUrl;
           break;
-        case "last":
+        case LAST:
           this.last = linkUrl;
           break;
       }

@@ -11,16 +11,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
-import static com.frankriccobono.App.basicAuth;
-
 public class GithubApiWrapper {
-  private static final String ACCESS_TOKEN = System.getenv("GITHUB_ACCESS_TOKEN");
   private final HttpClient client = HttpClient.newHttpClient();
   private final Gson gson = new Gson();
 
   public GithubApiWrapper() {
+  }
+
+  private static String basicAuth(String username, String password) {
+    return "Basic " + Base64.getEncoder()
+      .encodeToString((username + ":" + password).getBytes());
   }
 
   public List<Repository> getAllRepos(final String orgName) {
@@ -66,7 +69,7 @@ public class GithubApiWrapper {
   private HttpResponse<String> doGet(String url) throws IOException, InterruptedException {
     HttpRequest request = HttpRequest.newBuilder()
       .uri(URI.create(url))
-      .header("Authorization", basicAuth("aelfric", ACCESS_TOKEN))
+      .header("Authorization", basicAuth("aelfric", EnvironmentConstants.ACCESS_TOKEN))
       .build();
 
     return client.send(request, BodyHandlers.ofString());
@@ -77,7 +80,7 @@ public class GithubApiWrapper {
     HttpRequest request = HttpRequest.newBuilder()
       .DELETE()
       .uri(URI.create(url))
-      .header("Authorization", basicAuth("aelfric", ACCESS_TOKEN))
+      .header("Authorization", basicAuth("aelfric", EnvironmentConstants.ACCESS_TOKEN))
       .build();
 
     return client.send(request, BodyHandlers.ofString());
