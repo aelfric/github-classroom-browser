@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:controller="com.frankriccobono.FXMLController"
+            xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <ToolBar>
+            <Button onAction="#handleDirectoryChange">Directory</Button>
+            <Button onAction="#handleRefresh">Refresh</Button>
+            <Button onAction="#handleClone">Clone</Button>
+            <Button onAction="#handleDelete">Delete</Button>
+        </ToolBar>
+    </top>
+
+    <center>
+        <ListView fx:id="repoListView">
+        </ListView>
+    </center>
+
+    <bottom>
+        <TextField
+                onKeyTyped="#handleUpdateFilter"/>
+    </bottom>
+</BorderPane>
