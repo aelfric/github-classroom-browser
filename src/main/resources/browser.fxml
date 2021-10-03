@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Text?>
 <BorderPane fx:controller="com.frankriccobono.FXMLController"
             xmlns:fx="http://javafx.com/fxml">
     <top>
@@ -10,6 +11,8 @@
             <Button onAction="#handleRefresh">Refresh</Button>
             <Button onAction="#handleClone">Clone</Button>
             <Button onAction="#handleDelete">Delete</Button>
+            <Text fx:id="selectedDirectory"/>
+            <ProgressBar fx:id="progressBar" progress="0.0" />
         </ToolBar>
     </top>
 
