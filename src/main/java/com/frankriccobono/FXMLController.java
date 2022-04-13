@@ -124,7 +124,7 @@ public class FXMLController {
             }
 
         }
-        progressBar.setProgress(1.0);
+        progressBar.setProgress(1.0);   
     }
 
     public boolean cloneOrPullRepo(String cloneUrl, String repoName) {
@@ -144,6 +144,9 @@ public class FXMLController {
                     .call();
             } else {
                 Git repo = Git.open(destination);
+                repo
+                    .stashCreate()
+                    .call();
                 repo
                     .pull()
                     .setTransportConfigCallback(new App.SshCallback())
