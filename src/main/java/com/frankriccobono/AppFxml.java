@@ -16,7 +16,6 @@ import java.util.Objects;
  */
 
 public class AppFxml extends Application {
-  private final RepositoryService service = new RepositoryService();
 
   public static void main(String[] args) {
     launch();

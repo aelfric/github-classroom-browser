@@ -53,7 +53,7 @@ public class FXMLController {
         filteredList = new FilteredList<>(repositories, s -> true);
         repoListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         repoListView.setItems(filteredList);
-        repoListView.setCellFactory(view -> new App.RepositoryCell());
+        repoListView.setCellFactory(view -> new RepositoryCell());
     }
 
     @FXML
@@ -140,7 +140,7 @@ public class FXMLController {
                     .setDirectory(
                         destination
                     )
-                    .setTransportConfigCallback(new App.SshCallback())
+                    .setTransportConfigCallback(new SshCallback())
                     .call();
             } else {
                 Git repo = Git.open(destination);
@@ -149,7 +149,7 @@ public class FXMLController {
                     .call();
                 repo
                     .pull()
-                    .setTransportConfigCallback(new App.SshCallback())
+                    .setTransportConfigCallback(new SshCallback())
                     .call();
             }
             return true;
