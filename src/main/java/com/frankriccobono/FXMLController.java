@@ -70,6 +70,7 @@ public class FXMLController {
     protected void handleDirectoryChange(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(destinationDir);
         destinationDir = directoryChooser.showDialog(stage);
         this.selectedDirectory.setText(destinationDir.getAbsolutePath());
     }
