@@ -23,7 +23,7 @@ public class RepositoryService extends Service<ObservableList<Repository>> {
     }
 
     @Override
-    protected ObservableList<Repository> call() {
+    protected ObservableList<Repository> call() throws InterruptedException {
       GithubApiWrapper api = new GithubApiWrapper();
       return FXCollections.observableArrayList(api.getAllRepos("SIT-EE552-WS"));
     }

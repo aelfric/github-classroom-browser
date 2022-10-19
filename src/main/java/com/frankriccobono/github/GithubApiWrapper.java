@@ -18,15 +18,12 @@ public class GithubApiWrapper {
   private final HttpClient client = HttpClient.newHttpClient();
   private final Gson gson = new Gson();
 
-  public GithubApiWrapper() {
-  }
-
   private static String basicAuth(String username, String password) {
     return "Basic " + Base64.getEncoder()
       .encodeToString((username + ":" + password).getBytes());
   }
 
-  public List<Repository> getAllRepos(final String orgName) {
+  public List<Repository> getAllRepos(final String orgName) throws InterruptedException {
     try {
       HttpResponse<String> response = doGet(
         String.format("https://api.github.com/orgs/%s/repos?per_page=100&sort=full_name",
@@ -45,18 +42,18 @@ public class GithubApiWrapper {
 
       System.out.println("Loaded repositories " + repositories.size());
       return repositories;
-    } catch (IOException | InterruptedException e) {
-      throw new RuntimeException("Could not load repositories", e);
+    } catch (IOException e) {
+      throw new IllegalStateException("Could not load repositories", e);
     }
   }
 
-  public void deleteRepository(Repository repository) {
+  public void deleteRepository(Repository repository) throws InterruptedException {
     try {
       HttpResponse<String> response = doDelete(repository.url);
       System.out.println(response.statusCode());
       System.out.println(response.body());
-    } catch (IOException | InterruptedException e) {
-      throw new RuntimeException("Could not delete repository " + repository, e);
+    } catch (IOException e) {
+      throw new IllegalStateException("Could not delete repository " + repository, e);
     }
   }
 

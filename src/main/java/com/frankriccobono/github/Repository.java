@@ -12,10 +12,6 @@ public class Repository {
   public String sshUrl;
   public String  url;
 
-  public Repository(){
-
-  }
-
   @Override
   public String toString() {
     return "Repository{" +

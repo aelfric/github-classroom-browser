@@ -95,7 +95,7 @@ public class FXMLController {
     }
 
     @FXML
-    protected void handleDelete(ActionEvent event) {
+    protected void handleDelete(ActionEvent event) throws InterruptedException {
         ObservableList<Repository> selectedItems =
             repoListView.getSelectionModel().getSelectedItems();
         int total = selectedItems.size();
@@ -144,14 +144,15 @@ public class FXMLController {
                     .setTransportConfigCallback(new SshCallback())
                     .call();
             } else {
-                Git repo = Git.open(destination);
-                repo
-                    .stashCreate()
-                    .call();
-                repo
-                    .pull()
-                    .setTransportConfigCallback(new SshCallback())
-                    .call();
+                try(Git repo = Git.open(destination)) {
+                    repo
+                        .stashCreate()
+                        .call();
+                    repo
+                        .pull()
+                        .setTransportConfigCallback(new SshCallback())
+                        .call();
+                }
             }
             return true;
         } catch (GitAPIException | IOException e) {
