@@ -5,6 +5,7 @@ module com.frankriccobono {
   requires java.net.http;
   requires com.google.gson;
   requires org.eclipse.jgit;
+  requires org.eclipse.jgit.ssh.jsch;
   requires jsch;
   exports com.frankriccobono;
   exports com.frankriccobono.github;
