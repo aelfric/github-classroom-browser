@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class for traversing GitHub's link headers
+ * See
+ * <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/guides/traversing-with-pagination#basics-of-pagination>documentation</a>
+ */
 public class RelativeLinks {
   private static final String LINK = "link";
   private static final String NEXT = "next";

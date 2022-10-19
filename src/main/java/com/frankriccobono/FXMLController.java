@@ -63,7 +63,7 @@ public class FXMLController {
         filteredList.setPredicate(
             s -> filter == null ||
                 filter.length() == 0 ||
-                s.full_name.contains(filter));
+                s.full_name().contains(filter));
     }
 
     @FXML
@@ -87,7 +87,7 @@ public class FXMLController {
         int total = selectedItems.size();
         double count = 0.0;
         for (Repository repo : selectedItems) {
-            cloneOrPullRepo(repo.sshUrl, repo.name);
+            cloneOrPullRepo(repo.sshUrl(), repo.name());
             count++;
             progressBar.setProgress(count / total);
         }
@@ -105,7 +105,7 @@ public class FXMLController {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation Dialog");
             alert.setHeaderText("Deleting a Repository");
-            alert.setContentText("Are you sure you want to delete " + repo.full_name + "?");
+            alert.setContentText("Are you sure you want to delete " + repo.full_name() + "?");
 
             ButtonType delete = new ButtonType("Delete");
             ButtonType cancel = new ButtonType("Cancel");
@@ -116,7 +116,7 @@ public class FXMLController {
 
             if (result.isPresent() && result.get() == delete) {
                 System.out.println("WARNING - DELETING " + repo);
-                if (cloneOrPullRepo(repo.sshUrl, repo.name)) {
+                if (cloneOrPullRepo(repo.sshUrl(), repo.name())) {
                     GithubApiWrapper githubApiWrapper = new GithubApiWrapper();
                     githubApiWrapper.deleteRepository(repo);
                     count++;
@@ -136,13 +136,14 @@ public class FXMLController {
         try {
             if (!destination.exists()) {
 
-                Git.cloneRepository()
+                Git call = Git.cloneRepository()
                     .setURI(cloneUrl)
                     .setDirectory(
                         destination
                     )
                     .setTransportConfigCallback(new SshCallback())
                     .call();
+                call.close();
             } else {
                 try(Git repo = Git.open(destination)) {
                     repo

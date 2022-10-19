@@ -1,22 +1,24 @@
 package com.frankriccobono.github;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class GithubApiWrapper {
+  private static final Logger LOGGER = Logger.getLogger(GithubApiWrapper.class.getName());
+
   private final HttpClient client = HttpClient.newHttpClient();
-  private final Gson gson = new Gson();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   private static String basicAuth(String username, String password) {
     return "Basic " + Base64.getEncoder()
@@ -49,7 +51,7 @@ public class GithubApiWrapper {
 
   public void deleteRepository(Repository repository) throws InterruptedException {
     try {
-      HttpResponse<String> response = doDelete(repository.url);
+      HttpResponse<String> response = doDelete(repository.url());
       System.out.println(response.statusCode());
       System.out.println(response.body());
     } catch (IOException e) {
@@ -58,9 +60,15 @@ public class GithubApiWrapper {
   }
 
   private List<Repository> parseRepos(HttpResponse<String> response) {
-    Type type = new TypeToken<List<Repository>>() {
-    }.getType();
-    return gson.fromJson(response.body(), type);
+    try {
+      return mapper.readValue(
+          response.body(),
+          new TypeReference<>(){}
+      );
+    } catch (JsonProcessingException e) {
+      LOGGER.log(Level.SEVERE, "Could not parse repository", e);
+      return Collections.emptyList();
+    }
   }
 
   private HttpResponse<String> doGet(String url) throws IOException, InterruptedException {

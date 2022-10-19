@@ -1,17 +1,20 @@
 package com.frankriccobono.github;
 
-import com.google.gson.annotations.SerializedName;
 
-public class Repository {
-  public long id;
-  public String name;
-  public String full_name;
-  @SerializedName("private")
-  public boolean isPrivate;
-  @SerializedName("ssh_url")
-  public String sshUrl;
-  public String  url;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record Repository(
+  long id,
+  String name,
+  String full_name,
+  @JsonProperty("private")
+  boolean isPrivate,
+  @JsonProperty("ssh_url")
+  String sshUrl,
+  String  url
+){
   @Override
   public String toString() {
     return "Repository{" +

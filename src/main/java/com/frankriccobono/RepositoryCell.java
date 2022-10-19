@@ -10,7 +10,7 @@ public class RepositoryCell extends ListCell<Repository> {
         if (repository == null || empty) {
             setText(null);
         } else {
-            setText(repository.full_name + (repository.isPrivate ? " (private)" : ""));
+            setText(repository.full_name() + (repository.isPrivate() ? " (private)" : ""));
             setItem(repository);
         }
     }
