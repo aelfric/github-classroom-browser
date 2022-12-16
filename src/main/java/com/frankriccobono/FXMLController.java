@@ -17,12 +17,16 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
 public class FXMLController {
+    static Logger logger = LoggerFactory.getLogger(FXMLController.class);
+
     private final RepositoryService service = new RepositoryService();
     File destinationDir;
     @FXML
@@ -42,7 +46,7 @@ public class FXMLController {
         service.stateProperty().addListener(
             observable -> {
                 Worker.State now = service.getState();
-                System.out.println("State of service = " + now);
+                logger.info("State of service = {}", now);
                 if (now == Worker.State.SUCCEEDED) {
                     repositories.setAll(service.getValue());
                 }
@@ -115,7 +119,7 @@ public class FXMLController {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == delete) {
-                System.out.println("WARNING - DELETING " + repo);
+                logger.warn("DELETING {}", repo);
                 if (cloneOrPullRepo(repo.sshUrl(), repo.name())) {
                     GithubApiWrapper githubApiWrapper = new GithubApiWrapper();
                     githubApiWrapper.deleteRepository(repo);
@@ -135,7 +139,7 @@ public class FXMLController {
 
         try {
             if (!destination.exists()) {
-
+                logger.info("Cloning {}", repoName);
                 Git call = Git.cloneRepository()
                     .setURI(cloneUrl)
                     .setDirectory(
@@ -144,7 +148,9 @@ public class FXMLController {
                     .setTransportConfigCallback(new SshCallback())
                     .call();
                 call.close();
+                logger.info("Finished cloning {}", repoName);
             } else {
+                logger.info("Already cloned {} trying to stash and pull", repoName);
                 try(Git repo = Git.open(destination)) {
                     repo
                         .stashCreate()
@@ -153,6 +159,7 @@ public class FXMLController {
                         .pull()
                         .setTransportConfigCallback(new SshCallback())
                         .call();
+                    logger.info("Finished updating {}", repoName);
                 }
             }
             return true;

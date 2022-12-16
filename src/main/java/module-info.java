@@ -10,6 +10,8 @@ module com.frankriccobono {
   requires org.eclipse.jgit.ssh.jsch;
   requires jsch;
   requires java.logging;
+  requires org.slf4j;
+  requires org.slf4j.simple;
   exports com.frankriccobono;
   exports com.frankriccobono.github;
   opens com.frankriccobono;

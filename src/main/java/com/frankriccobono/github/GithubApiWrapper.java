@@ -3,6 +3,8 @@ package com.frankriccobono.github;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,13 +12,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+
 
 public class GithubApiWrapper {
-  private static final Logger LOGGER = Logger.getLogger(GithubApiWrapper.class.getName());
 
+  static Logger logger = LoggerFactory.getLogger(GithubApiWrapper.class);
   private final HttpClient client = HttpClient.newHttpClient();
   private final ObjectMapper mapper = new ObjectMapper();
 
@@ -36,13 +40,13 @@ public class GithubApiWrapper {
       ArrayList<Repository> repositories = new ArrayList<>(parseRepos(response));
 
       while (links.next != null) {
-        System.out.println("Retrieving page...");
+        logger.info("Retrieving page...");
         HttpResponse<String> nextResponse = doGet(links.next);
         repositories.addAll(parseRepos(nextResponse));
         links = new RelativeLinks(nextResponse);
       }
 
-      System.out.println("Loaded repositories " + repositories.size());
+      logger.info("Loaded repositories {}", repositories.size());
       return repositories;
     } catch (IOException e) {
       throw new IllegalStateException("Could not load repositories", e);
@@ -52,8 +56,8 @@ public class GithubApiWrapper {
   public void deleteRepository(Repository repository) throws InterruptedException {
     try {
       HttpResponse<String> response = doDelete(repository.url());
-      System.out.println(response.statusCode());
-      System.out.println(response.body());
+      String body = response.body();
+      logger.info("{}\n{}", response.statusCode(), body);
     } catch (IOException e) {
       throw new IllegalStateException("Could not delete repository " + repository, e);
     }
@@ -66,7 +70,7 @@ public class GithubApiWrapper {
           new TypeReference<>(){}
       );
     } catch (JsonProcessingException e) {
-      LOGGER.log(Level.SEVERE, "Could not parse repository", e);
+      logger.error("Could not parse repository", e);
       return Collections.emptyList();
     }
   }
